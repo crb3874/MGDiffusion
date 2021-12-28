@@ -84,56 +84,15 @@
 []
 
 [AuxVariables]
-# copy array variable components
-  [flux_fast]
-    family = L2_LAGRANGE
-    order = FIRST
-  []
-  [flux_thermal]
-    family = L2_LAGRANGE
-    order = FIRST
-  []
-# store integrated flux over each element
-  [integrated_flux_fast]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [integrated_flux_thermal]
-    family = MONOMIAL
-    order = CONSTANT
-  []
 # store reaction rate (fission power)
   [kappa_fission_phi]
+# [q_triple_prime]
     family = L2_LAGRANGE
     order = FIRST
   []
 []
 
 [AuxKernels]
-  [copy_flux_fast]
-    type = ArrayVariableComponent
-    array_variable = scalar_flux
-    variable = flux_fast
-    component = 0 
-  []
-  [copy_flux_thermal]
-    type = ArrayVariableComponent
-    array_variable = scalar_flux
-    variable = flux_thermal
-    component = 1 
-  []
-  [integrate_flux_fast] 
-    type = ElementLpNormAux
-    variable = integrated_flux_fast
-    coupled_variable = flux_fast
-    p = 1
-  []
-  [integrate_flux_thermal] 
-    type = ElementLpNormAux
-    variable = integrated_flux_thermal
-    coupled_variable = flux_thermal
-    p = 1
-  []
   [compute_kappa_fission_phi]
     type = ReactionRateAux
     variable = kappa_fission_phi
@@ -149,6 +108,7 @@
     direction = z
     num_layers = 20
     variable = kappa_fission_phi
+#   variable = q_triple_prime
     execute_on = timestep_end
     cumulative = true
     positive_cumulative_direction = true
@@ -156,28 +116,7 @@
 
 []
 
-[Postprocessors]
-  [mem_per_process]
-    type = MemoryUsage
-    mem_units = megabytes
-    value_type = average
-    outputs = 'csv'
-  []
-  [perf_graph]
-    type = PerfGraphData
-    data_type = TOTAL
-    section_name = 'Root'
-    outputs = 'csv'
-  []
-[]
-
 [VectorPostprocessors]
-  [flux_sampler]
-    type = ElementValueSampler
-    variable = 'integrated_flux_fast integrated_flux_thermal'
-    sort_by = id
-    execute_on = 'TIMESTEP_END'
-  []
 # output axial power integral
   [axial_power_out]
     type = SpatialUserObjectVectorPostprocessor
@@ -186,7 +125,7 @@
 []
 
 [Outputs]
-  file_base = 'flux_sampler'
+  file_base = 'temp_profile'
   exodus = true
   csv = true
   [pgraph]
